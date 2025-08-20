@@ -1,0 +1,42 @@
+apiVersion: mysql.oracle.com/v2
+kind: InnoDBCluster
+metadata:
+  name: mysql-demo
+  namespace: mysql-demo
+spec:
+  secretName: mysql-secret
+  instances: 3
+  version: "9.4.0"
+
+  router:
+    instances: 2
+    version: "9.4.0"
+    podSpec:
+      serviceAccountName: mysql-demo-sidecar-sa
+      imagePullSecrets:
+        - name: oracle-registry-secret
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 1000670000
+        seccompProfile: { type: RuntimeDefault }
+
+  tlsUseSelfSigned: true
+
+  datadirPermissions:
+    setRightsUsingInitContainer: true
+
+  datadirVolumeClaimTemplate:
+    accessModes: ["ReadWriteOnce"]
+    resources:
+      requests:
+        storage: 5Gi
+
+  podSpec:
+    serviceAccountName: mysql-ic-sa
+    imagePullSecrets:
+      - name: oracle-registry-secret
+    securityContext:
+      runAsNonRoot: true
+      fsGroup: 1000670000
+      fsGroupChangePolicy: OnRootMismatch
+      seccompProfile: { type: RuntimeDefault }

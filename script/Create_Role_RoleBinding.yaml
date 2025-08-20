@@ -1,0 +1,35 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mysql-ic-rbac
+  namespace: mysql-demo
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get","list","watch","update","patch"]
+  - apiGroups: [""]
+    resources: ["pods/status"]        
+    verbs: ["update","patch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create","patch","update"]
+  - apiGroups: [""]
+    resources: ["secrets","configmaps"]
+    verbs: ["get","list","watch"]
+  - apiGroups: ["mysql.oracle.com"]
+    resources: ["innodbclusters","innodbclusters/status"]
+    verbs: ["get","list","watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mysql-ic-rbac-binding
+  namespace: mysql-demo
+subjects:
+  - kind: ServiceAccount
+    name: mysql-ic-sa
+    namespace: mysql-demo
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mysql-ic-rbac
